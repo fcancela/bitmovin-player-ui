@@ -1,8 +1,8 @@
-import {LabelConfig, Label} from './label';
-import {UIInstanceManager} from '../uimanager';
+import { LabelConfig, Label } from './label';
+import { UIInstanceManager } from '../uimanager';
 import LiveStreamDetectorEventArgs = PlayerUtils.LiveStreamDetectorEventArgs;
-import {PlayerUtils} from '../playerutils';
-import {StringUtils} from '../stringutils';
+import { PlayerUtils } from '../playerutils';
+import { StringUtils } from '../stringutils';
 import { PlayerAPI } from 'bitmovin-player';
 import { i18n } from '../localization/i18n';
 
@@ -66,13 +66,16 @@ export class PlaybackTimeLabel extends Label<PlaybackTimeLabelConfig> {
     let minWidth = 0;
 
     let liveClickHandler = () => {
+      if (player.lowlatency.getLatency() === 0) {
+        return
+      }
       player.timeShift(0);
+      player.lowlatency.setTargetLatency(0);
     };
 
     let updateLiveState = () => {
       // Player is playing a live stream when the duration is infinite
       live = player.isLive();
-
       // Attach/detach live marker class
       if (live) {
         this.getDomElement().addClass(liveCssClass);
@@ -95,7 +98,7 @@ export class PlaybackTimeLabel extends Label<PlaybackTimeLabelConfig> {
         return;
       }
 
-      // The player is only at the live edge iff the stream is not shifted and it is actually playing or playback has
+      // The player is only at the live edge if the stream is not shifted and it is actually playing or playback has
       // never been started (meaning it isn't paused). A player that is paused is always behind the live edge.
       // An exception is made for live streams without a timeshift window, because here we "stop" playback instead
       // of pausing it (from a UI perspective), so we keep the live edge indicator on because a play would always
@@ -103,6 +106,19 @@ export class PlaybackTimeLabel extends Label<PlaybackTimeLabelConfig> {
       const isTimeshifted = player.getTimeShift() < 0;
       const isTimeshiftAvailable = player.getMaxTimeShift() < 0;
       if (!isTimeshifted && (!player.isPaused() || !isTimeshiftAvailable)) {
+        this.getDomElement().addClass(liveEdgeCssClass);
+      } else {
+        this.getDomElement().removeClass(liveEdgeCssClass);
+      }
+    };
+
+    let updateLiveTargetLatencyState = () => {
+      if (!live) {
+        return;
+      }
+      const isTargetLatencyChanged = player.lowlatency.getLatency() > 0;
+      // const isTargetLatencyAvailable = player.lowlatency.getLatencyRange().start > 0;
+      if (!isTargetLatencyChanged && !player.isPaused()) {
         this.getDomElement().addClass(liveEdgeCssClass);
       } else {
         this.getDomElement().removeClass(liveEdgeCssClass);
@@ -137,20 +153,25 @@ export class PlaybackTimeLabel extends Label<PlaybackTimeLabelConfig> {
     let updateTimeFormatBasedOnDuration = () => {
       // Set time format depending on source duration
       this.timeFormat = Math.abs(player.isLive() ? player.getMaxTimeShift() : player.getDuration()) >= 3600 ?
-      StringUtils.FORMAT_HHMMSS : StringUtils.FORMAT_MMSS;
+        StringUtils.FORMAT_HHMMSS : StringUtils.FORMAT_MMSS;
       playbackTimeHandler();
     };
 
-    player.on(player.exports.PlayerEvent.TimeChanged, playbackTimeHandler);
-    player.on(player.exports.PlayerEvent.Ready, updateTimeFormatBasedOnDuration);
-    player.on(player.exports.PlayerEvent.Seeked, playbackTimeHandler);
-
-    player.on(player.exports.PlayerEvent.TimeShift, updateLiveTimeshiftState);
-    player.on(player.exports.PlayerEvent.TimeShifted, updateLiveTimeshiftState);
-    player.on(player.exports.PlayerEvent.Playing, updateLiveTimeshiftState);
-    player.on(player.exports.PlayerEvent.Paused, updateLiveTimeshiftState);
-    player.on(player.exports.PlayerEvent.StallStarted, updateLiveTimeshiftState);
-    player.on(player.exports.PlayerEvent.StallEnded, updateLiveTimeshiftState);
+    if (player.lowlatency.getLatency() >= 0) {
+      player.on(player.exports.PlayerEvent.Playing, updateLiveTargetLatencyState);
+      player.on(player.exports.PlayerEvent.Paused, updateLiveTargetLatencyState);
+      player.on(player.exports.PlayerEvent.TargetLatencyChanged, updateLiveTargetLatencyState);
+    } else {
+      player.on(player.exports.PlayerEvent.TimeChanged, playbackTimeHandler);
+      player.on(player.exports.PlayerEvent.Ready, updateTimeFormatBasedOnDuration);
+      player.on(player.exports.PlayerEvent.Seeked, playbackTimeHandler);
+      player.on(player.exports.PlayerEvent.TimeShift, updateLiveTimeshiftState);
+      player.on(player.exports.PlayerEvent.TimeShifted, updateLiveTimeshiftState);
+      player.on(player.exports.PlayerEvent.Playing, updateLiveTimeshiftState);
+      player.on(player.exports.PlayerEvent.Paused, updateLiveTimeshiftState);
+      player.on(player.exports.PlayerEvent.StallStarted, updateLiveTimeshiftState);
+      player.on(player.exports.PlayerEvent.StallEnded, updateLiveTimeshiftState);
+    }
 
     let init = () => {
       // Reset min-width when a new source is ready (especially for switching VOD/Live modes where the label content

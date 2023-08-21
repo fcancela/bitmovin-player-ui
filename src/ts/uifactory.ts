@@ -50,6 +50,7 @@ import { AudioTrackListBox } from './components/audiotracklistbox';
 import { SpatialNavigation } from './spatialnavigation/spatialnavigation';
 import { RootNavigationGroup } from './spatialnavigation/rootnavigationgroup';
 import { ListNavigationGroup, ListOrientation } from './spatialnavigation/ListNavigationGroup';
+// import {Button, ButtonConfig} from './components/button';
 
 export namespace UIFactory {
 
@@ -116,6 +117,22 @@ export namespace UIFactory {
 
     settingsPanel.addComponent(subtitleSettingsPanelPage);
 
+    // let rewindButton = new Button({cssClass: 'ui-rewindbutton bmpui-ui-button'});
+    // rewindButton.onClick.subscribe(function () {
+    //   this.player.lowlatency.setTargetLatency(this.player.lowlatency.getLatency() + this.player.lowlatency.getLatencyRange().end)
+    // });
+
+    // let forwardButton = new Button({cssClass: 'ui-forwardbutton bmpui-ui-button'});
+    // forwardButton.onClick.subscribe(function () {
+    //   console.log(this.player);
+      
+    //   if (this.player.lowlatency.getLatency() - this.player.lowlatency.getLatencyRange().end < this.player.lowlatency.getLatencyRange().end) {
+    //     this.player.lowlatency.setTargetLatency(this.player.lowlatency.getLatency() + this.player.lowlatency.getLatencyRange().end)
+    //   } else {
+    //     this.player.lowlatency.setTargetLatency(0)
+    //   }
+    // });
+
     let controlBar = new ControlBar({
       components: [
         settingsPanel,
@@ -129,7 +146,9 @@ export namespace UIFactory {
         }),
         new Container({
           components: [
+            // rewindButton,
             new PlaybackToggleButton(),
+            // forwardButton,
             new VolumeToggleButton(),
             new VolumeSlider(),
             new Spacer(),
