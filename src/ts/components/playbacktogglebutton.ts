@@ -121,7 +121,7 @@ export class PlaybackToggleButton extends ToggleButton<PlaybackToggleButtonConfi
       this.onClick.subscribe(() => {
         if (player.isPlaying() || this.isPlayInitiated) {
           if (player.lowlatency.getLatency() === 0) {
-            player.lowlatency.setTargetLatency(player.lowlatency.getLatencyRange().end)
+            player.lowlatency.setTargetLatency(player.lowlatency.getLatencyRange().end);
           }
           player.pause('ui');
         } else {

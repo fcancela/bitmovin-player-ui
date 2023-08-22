@@ -67,7 +67,7 @@ export class PlaybackTimeLabel extends Label<PlaybackTimeLabelConfig> {
 
     let liveClickHandler = () => {
       if (player.lowlatency.getLatency() === 0) {
-        return
+        return;
       }
       player.timeShift(0);
       player.lowlatency.setTargetLatency(0);

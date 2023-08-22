@@ -50,7 +50,7 @@ import { AudioTrackListBox } from './components/audiotracklistbox';
 import { SpatialNavigation } from './spatialnavigation/spatialnavigation';
 import { RootNavigationGroup } from './spatialnavigation/rootnavigationgroup';
 import { ListNavigationGroup, ListOrientation } from './spatialnavigation/ListNavigationGroup';
-// import {Button, ButtonConfig} from './components/button';
+// import { Button } from './components/button';
 
 export namespace UIFactory {
 
@@ -117,15 +117,13 @@ export namespace UIFactory {
 
     settingsPanel.addComponent(subtitleSettingsPanelPage);
 
-    // let rewindButton = new Button({cssClass: 'ui-rewindbutton bmpui-ui-button'});
+    // let rewindButton = new Button({ cssClass: 'ui-rewindbutton bmpui-ui-button' });
     // rewindButton.onClick.subscribe(function () {
     //   this.player.lowlatency.setTargetLatency(this.player.lowlatency.getLatency() + this.player.lowlatency.getLatencyRange().end)
     // });
 
-    // let forwardButton = new Button({cssClass: 'ui-forwardbutton bmpui-ui-button'});
+    // let forwardButton = new Button({ cssClass: 'ui-forwardbutton bmpui-ui-button' });
     // forwardButton.onClick.subscribe(function () {
-    //   console.log(this.player);
-      
     //   if (this.player.lowlatency.getLatency() - this.player.lowlatency.getLatencyRange().end < this.player.lowlatency.getLatencyRange().end) {
     //     this.player.lowlatency.setTargetLatency(this.player.lowlatency.getLatency() + this.player.lowlatency.getLatencyRange().end)
     //   } else {
@@ -193,7 +191,7 @@ export namespace UIFactory {
         new PlaybackToggleOverlay(),
         new Container({
           components: [
-            new AdMessageLabel({ text: i18n.getLocalizer('ads.remainingTime')}),
+            new AdMessageLabel({ text: i18n.getLocalizer('ads.remainingTime') }),
             new AdSkipButton(),
           ],
           cssClass: 'ui-ads-status',
@@ -435,9 +433,9 @@ export namespace UIFactory {
   }
 
   export function buildModernTvUI(player: PlayerAPI, config: UIConfig = {}): UIManager {
-        return new UIManager(player, [{
-          ...modernTvUI(),
-        }], config);
+    return new UIManager(player, [{
+      ...modernTvUI(),
+    }], config);
   }
 
   export function modernTvUI() {
