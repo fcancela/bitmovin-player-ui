@@ -1,6 +1,6 @@
-import {PlaybackToggleButton, PlaybackToggleButtonConfig} from './playbacktogglebutton';
-import {DOM} from '../dom';
-import {UIInstanceManager} from '../uimanager';
+import { PlaybackToggleButton, PlaybackToggleButtonConfig } from './playbacktogglebutton';
+import { DOM } from '../dom';
+import { UIInstanceManager } from '../uimanager';
 import { PlayerAPI, PlayerEventBase, WarningEvent } from 'bitmovin-player';
 import { i18n } from '../localization/i18n';
 
@@ -30,6 +30,9 @@ export class HugePlaybackToggleButton extends PlaybackToggleButton {
 
     let togglePlayback = () => {
       if (player.isPlaying() || this.isPlayInitiated) {
+        if (player.lowlatency.getLatency() === 0) {
+          player.lowlatency.setTargetLatency(player.lowlatency.getLatencyRange().end)
+        }
         player.pause('ui');
       } else {
         player.play('ui');

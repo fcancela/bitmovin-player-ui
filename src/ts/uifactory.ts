@@ -116,6 +116,20 @@ export namespace UIFactory {
 
     settingsPanel.addComponent(subtitleSettingsPanelPage);
 
+    // let rewindButton = new Button({ cssClass: 'ui-rewindbutton bmpui-ui-button' });
+    // rewindButton.onClick.subscribe(function () {
+    //   this.player.lowlatency.setTargetLatency(this.player.lowlatency.getLatency() + this.player.lowlatency.getLatencyRange().end)
+    // });
+
+    // let forwardButton = new Button({ cssClass: 'ui-forwardbutton bmpui-ui-button' });
+    // forwardButton.onClick.subscribe(function () {
+    //   if (this.player.lowlatency.getLatency() - this.player.lowlatency.getLatencyRange().end < this.player.lowlatency.getLatencyRange().end) {
+    //     this.player.lowlatency.setTargetLatency(this.player.lowlatency.getLatency() + this.player.lowlatency.getLatencyRange().end)
+    //   } else {
+    //     this.player.lowlatency.setTargetLatency(0)
+    //   }
+    // });
+
     let controlBar = new ControlBar({
       components: [
         settingsPanel,
@@ -130,7 +144,9 @@ export namespace UIFactory {
         }),
         new Container({
           components: [
+            // rewindButton,
             new PlaybackToggleButton(),
+            // forwardButton,
             new VolumeToggleButton(),
             new VolumeSlider(),
             new Spacer(),
@@ -175,7 +191,7 @@ export namespace UIFactory {
         new PlaybackToggleOverlay(),
         new Container({
           components: [
-            new AdMessageLabel({ text: i18n.getLocalizer('ads.remainingTime')}),
+            new AdMessageLabel({ text: i18n.getLocalizer('ads.remainingTime') }),
             new AdSkipButton(),
           ],
           cssClass: 'ui-ads-status',
@@ -417,9 +433,9 @@ export namespace UIFactory {
   }
 
   export function buildModernTvUI(player: PlayerAPI, config: UIConfig = {}): UIManager {
-        return new UIManager(player, [{
-          ...modernTvUI(),
-        }], config);
+    return new UIManager(player, [{
+      ...modernTvUI(),
+    }], config);
   }
 
   export function modernTvUI() {

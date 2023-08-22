@@ -183,7 +183,12 @@ export class SeekBar extends Component<SeekBarConfig> {
 
   private getPlaybackPositionPercentage(): number {
     if (this.player.isLive()) {
-      return 100 - (100 / this.player.getMaxTimeShift() * this.player.getTimeShift());
+      if (this.player.lowlatency.getLatency() >= 0) {
+        var range = this.player.lowlatency.getLatencyRange().start - this.player.lowlatency.getLatencyRange().end;
+        return 100 - (100 / range * this.player.lowlatency.getLatency());
+      } else {
+        return 100 - (100 / this.player.getMaxTimeShift() * this.player.getTimeShift());
+      }
     }
 
     return 100 / this.player.getDuration() * this.getRelativeCurrentTime();
@@ -273,7 +278,7 @@ export class SeekBar extends Component<SeekBarConfig> {
         // Update playback position only in paused state or in the initial startup state where player is neither
         // paused nor playing. Playback updates are handled in the Timeout below.
         const isInInitialStartupState = this.config.smoothPlaybackPositionUpdateIntervalMs === SeekBar.SMOOTH_PLAYBACK_POSITION_UPDATE_DISABLED
-            || forceUpdate || player.isPaused();
+          || forceUpdate || player.isPaused();
         const isNeitherPausedNorPlaying = player.isPaused() === player.isPlaying();
 
         if ((isInInitialStartupState || isNeitherPausedNorPlaying) && !this.isSeeking()) {
@@ -309,7 +314,7 @@ export class SeekBar extends Component<SeekBarConfig> {
       scrubbing = false;
     };
 
-    let onPlayerSeeked = (event: PlayerEventBase = null, forceUpdate: boolean = false ) => {
+    let onPlayerSeeked = (event: PlayerEventBase = null, forceUpdate: boolean = false) => {
       isPlayerSeeking = false;
       this.setSeeking(false);
 
@@ -482,8 +487,13 @@ export class SeekBar extends Component<SeekBarConfig> {
   private getTargetSeekPosition = (percentage: number) => {
     let target: number;
     if (this.player.isLive()) {
-      const maxTimeShift = this.player.getMaxTimeShift();
-      target = maxTimeShift - (maxTimeShift * (percentage / 100));
+      if (this.player.lowlatency.getLatency() >= 0) {
+        const maxTimeShift = this.player.lowlatency.getLatencyRange().start - this.player.lowlatency.getLatencyRange().end;
+        target = maxTimeShift - (maxTimeShift * (percentage / 100));
+      } else {
+        const maxTimeShift = this.player.getMaxTimeShift();
+        target = maxTimeShift - (maxTimeShift * (percentage / 100));
+      }
     } else {
       const seekableRangeStart = PlayerUtils.getSeekableRangeStart(this.player, 0);
       const relativeSeekTarget = this.player.getDuration() * (percentage / 100);
@@ -496,7 +506,11 @@ export class SeekBar extends Component<SeekBarConfig> {
   private seek = (percentage: number) => {
     const targetPlaybackPosition = this.getTargetSeekPosition(percentage);
     if (this.player.isLive()) {
-      this.player.timeShift(targetPlaybackPosition, 'ui');
+      if (this.player.lowlatency.getLatency() >= 0) {
+        this.player.lowlatency.setTargetLatency(targetPlaybackPosition);
+      } else {
+        this.player.timeShift(targetPlaybackPosition, 'ui');
+      }
     } else {
       this.player.seek(targetPlaybackPosition, 'ui');
     }
@@ -1068,10 +1082,10 @@ export class SeekBar extends Component<SeekBarConfig> {
     this.refreshPlaybackPosition();
   }
 
- /**
-   * Checks if TouchEvent is supported.
-   * @returns {boolean} true if TouchEvent not undefined, else false
-   */
+  /**
+    * Checks if TouchEvent is supported.
+    * @returns {boolean} true if TouchEvent not undefined, else false
+    */
   isTouchEvent(e: UIEvent): e is TouchEvent {
     return window.TouchEvent && e instanceof TouchEvent;
   }
