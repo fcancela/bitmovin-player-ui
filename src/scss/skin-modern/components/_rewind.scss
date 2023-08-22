@@ -1,0 +1,18 @@
+@import '../variables';
+@import '../mixins';
+
+.#{$prefix}-ui-rewind {
+  @extend %ui-button;
+  margin-top: -8px !important;
+  // svg() usage: http://pavliko.github.io/postcss-svg/
+  background-image: url('../../assets/skin-modern/images/rewind.svg');
+
+  &:hover {
+    @include svg-icon-shadow;
+  }
+
+  &.#{$prefix}-on {
+    margin-top: -8px !important;
+    background-image: url('../../assets/skin-modern/images/rewindX.svg');
+  }
+}
